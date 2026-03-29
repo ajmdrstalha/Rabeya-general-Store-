@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>রাবেয়া জেনারেল স্টোর - Sales Calculator</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;
+      --text:#0b1220;
+      --accent:#1f66c1;
+      --accent2:#0b3d91;
+      --border:#d9d9d9;
+      --card:#ffffff;
+      --shadow:0 2px 10px rgba(0,0,0,0.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans Bengali", sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:var(--accent2);
+      color:#fff;
+      padding:12px 14px;
+      font-size:18px;
+      font-weight:800;
+      text-align:center;
+      letter-spacing:.2px;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:12px 12px 120px;
+    }
+
+    .header-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .field label{
+      font-weight:700;
+      font-size:14px;
+      color:#102a43;
+    }
+    .field input{
+      padding:12px 12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:16px;
+      background:#fff;
+    }
+
+    #pdfHeaderLine{
+      font-weight:800;
+      margin:8px 0 10px;
+      color:#102a43;
+    }
+
+    .search-wrap{
+      position:sticky;
+      top:52px;
+      z-index:40;
+      background:var(--bg);
+      padding:10px 0 10px;
+    }
+    .search{
+      width:100%;
+      padding:12px 12px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      font-size:16px;
+      background:#fff;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    }
+
+    /* Desktop table */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin:12px 0;
+      background:#fff;
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    th, td{border:1px solid #e6e8ef;padding:10px;text-align:center;vertical-align:middle;}
+    th{background:#f5f8ff;color:#0b3d91;font-weight:800;}
+    .pblock{
+      text-align:left;
+      line-height:1.25;
+    }
+    .pblock .pname{
+      font-weight:900;
+      color:#0b3d91;
+      margin-bottom:4px;
+    }
+    .pblock .pline{
+      font-size:13px;
+      font-weight:700;
+      color:#243b53;
+    }
+
+    .qty-controls{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+    }
+
+    .btn{
+      border:none;
+      background:var(--accent);
+      color:white;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+    }
+    .btn:active{transform:scale(0.98)}
+    .btn-small{
+      width:54px;
+      height:44px;
+      font-size:22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 1px 6px rgba(0,0,0,.18);
+    }
+    .qty{
+      min-width:44px;
+      font-weight:900;
+      font-size:20px;
+      line-height:1;
+      color:#0b3d91;
+      text-align:center;
+    }
+
+    /* Mobile cards */
+    .card-list{
+      display:none;
+      gap:10px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      padding:12px;
+    }
+    .card-top{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:start;
+    }
+    .card-total{
+      text-align:right;
+      min-width:90px;
+    }
+    .card-total .label{
+      font-size:12px;
+      font-weight:800;
+      color:#627d98;
+    }
+    .card-total .value{
+      font-size:18px;
+      font-weight:900;
+      color:#111;
+      margin-top:2px;
+    }
+
+    .card-controls{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .ctrl-box{
+      border:1px solid #e6e8ef;
+      border-radius:12px;
+      padding:10px;
+      background:#fbfdff;
+    }
+    .ctrl-title{
+      font-size:12px;
+      font-weight:900;
+      color:#334e68;
+      margin-bottom:8px;
+      text-align:center;
+    }
+
+    /* Sticky footer totals */
+    .sticky-footer{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:60;
+      background:#ffffff;
+      border-top:1px solid #e6e8ef;
+      box-shadow: 0 -6px 18px rgba(0,0,0,.10);
+      padding:10px 12px;
+    }
+    .footer-inner{
+      max-width:1100px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+      align-items:center;
+    }
+    .total-pill{
+      background:#f5f8ff;
+      border:1px solid #e2e8f0;
+      border-radius:14px;
+      padding:10px 12px;
+    }
+    .total-pill .tlabel{
+      font-size:12px;
+      font-weight:900;
+      color:#627d98;
+      margin-bottom:2px;
+    }
+    .total-pill .tvalue{
+      font-size:18px;
+      font-weight:900;
+      color:#0b3d91;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:12px 0 4px;
+    }
+    .btn-action{
+      padding:10px 14px;
+      font-size:15px;
+      border-radius:12px;
+      box-shadow: 0 1px 8px rgba(0,0,0,.14);
+    }
+    .btn-secondary{background:#334e68;}
+
+    .money-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:10px;
+    }
+
+    @media (max-width: 820px){
+      table{display:none;}
+      .card-list{display:grid;}
+      .header-grid{grid-template-columns: 1fr;}
+      .money-grid{grid-template-columns: 1fr;}
+      .search-wrap{top:48px;}
+      .topbar{font-size:17px}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">রাবেয়া জেনারেল স্টোর</div>
+
+  <div class="container" id="pdfArea">
+    <div class="header-grid">
+      <div class="field">
+        <label for="dsrName">DSR Name</label>
+        <input id="dsrName" type="text" placeholder="Enter DSR Name" />
+      </div>
+      <div class="field">
+        <label for="saleDate">Date</label>
+        <input id="saleDate" type="date" />
+      </div>
+    </div>
+
+    <div id="pdfHeaderLine">
+      DSR Name: <span id="dsrText">-</span> | Date: <span id="dateText">-</span>
+    </div>
+
+    <div class="search-wrap">
+      <input id="searchInput" class="search" type="text" placeholder="Search product..." />
+    </div>
+
+    <!-- Desktop table: name block includes prices (like your picture) -->
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th style="text-align:left;">Product</th>
+          <th>Carton Qty</th>
+          <th>Piece Qty</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- Mobile cards: name block includes prices (like your picture) -->
+    <div class="card-list" id="cardList"></div>
+
+    <div class="actions">
+      <button class="btn btn-action btn-secondary" id="resetBtn">Reset</button>
+      <button class="btn btn-action" id="pdfBtn">Generate PDF</button>
+    </div>
+
+    <div class="money-grid">
+      <div class="field">
+        <label for="depositAmount">Deposit</label>
+        <input id="depositAmount" type="number" min="0" step="1" placeholder="Enter deposit amount" />
+      </div>
+      <div class="field">
+        <label for="dueAmount">Due</label>
+        <input id="dueAmount" type="number" readonly />
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky footer totals -->
+  <div class="sticky-footer">
+    <div class="footer-inner">
+      <div class="total-pill">
+        <div class="tlabel">Grand Total</div>
+        <div class="tvalue" id="grandTotal">0</div>
+      </div>
+      <div class="total-pill">
+        <div class="tlabel">2% Total</div>
+        <div class="tvalue" id="twoPercentTotal">0</div>
+      </div>
+      <div class="total-pill">
+        <div class="tlabel">Due</div>
+        <div class="tvalue" id="dueTotalText">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jsPDF + html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    const products = [
+      ["ব্রেড ৭০০ গ্রাম", 372, 62],
+      ["ব্রেড ৩৫০ গ্রাম", 405, 34],
+      ["ব্রেড ২৫০ গ্রাম", 312, 26],
+      ["ব্রেড ১৫০ গ্রাম", 320, 19],
+      ["ব্রেড ৩০০ গ্রাম", 460, 39],
+      ["ফেসবান", 480, 4],
+      ["বাটারবান", 900, 8],
+      ["মেগা বাটার", 550, 13],
+      ["ভেনিলা বান", 900, 8],
+      ["চকোলেট বান", 900, 8],
+      ["হানিকম", 550, 12],
+      ["ফ্যামেলি কেক", 1380, 23],
+      ["স্লাইস কেক", 940, 8],
+      ["মেঘা লুস", 410, 12],
+      ["ক্রিম রোল", 685, 12],
+      ["সেন্ডুস কেক", 540, 8],
+      ["ক্রিম ফিল", 540, 8],
+      ["ফ্রুট কেক", 960, 96],
+      ["প্লেন কেক", 820, 82],
+      ["মুরব্বা বান", 343, 12],
+      ["ডোনাট", 830, 12],
+      ["ঘি টোস্ট", 940, 20],
+      ["ঘি পাতা", 720, 8],
+      ["রাস্ক টোস্ট", 310, 52],
+      ["রোমা", 940, 47],
+      ["পিলো", 360, 8],
+      ["লেয়ার কেক", 270, 4],
+      ["বিস্কিট", 180, 4],
+      ["মামা ১২", 460, 39],
+      ["মামা ১০", 385, 39],
+      ["মামা ছোট", 270, 90],
+      ["মামা ভাঙা", 460, 39],
+      ["মামা পাতা", 870, 8],
+      ["ড্রাই বড়", 675, 112],
+      ["ড্রাই কেক P", 540, 8],
+      ["ডোনাট ২০", 873, 16],
+      ["কুকিস", 670, 112],
+      ["সেরো", 552, 69],
+      ["জাম ব্রেড", 364, 12],
+      ["পাই কেক", 830, 12],
+      ["রোমা বড়", 1340, 112],
+      ["কোকোনাট", 735, 16],
+      ["ড্রাই বিস্কুট", 282, 24]
+    ];
+
+    const tbody = document.querySelector("#productTable tbody");
+    const cardList = document.getElementById("cardList");
+
+    const grandTotalEl = document.getElementById("grandTotal");
+    const twoPercentEl = document.getElementById("twoPercentTotal");
+
+    const depositInput = document.getElementById("depositAmount");
+    const dueInput = document.getElementById("dueAmount");
+    const dueTotalText = document.getElementById("dueTotalText");
+
+    const dsrInput = document.getElementById("dsrName");
+    const dateInput = document.getElementById("saleDate");
+    const dsrText = document.getElementById("dsrText");
+    const dateText = document.getElementById("dateText");
+    const searchInput = document.getElementById("searchInput");
+
+    function formatNumber(n){
+      return Math.round(Number(n));
+    }
+
+    function setQty(idx, type, value){
+      if(type === "carton"){
+        const t = document.getElementById(`carton-qty-${idx}`);
+        const m = document.getElementById(`carton-qty-${idx}-m`);
+        if(t) t.textContent = value;
+        if(m) m.textContent = value;
+      } else {
+        const t = document.getElementById(`piece-qty-${idx}`);
+        const m = document.getElementById(`piece-qty-${idx}-m`);
+        if(t) t.textContent = value;
+        if(m) m.textContent = value;
+      }
+    }
+
+    function getQty(idx, type){
+      const el = document.getElementById(`${type}-qty-${idx}`) || document.getElementById(`${type}-qty-${idx}-m`);
+      if(!el) return 0;
+      return type === "carton" ? (parseFloat(el.textContent) || 0) : (parseInt(el.textContent, 10) || 0);
+    }
+
+    function renderTable(){
+      tbody.innerHTML = "";
+      products.forEach((p, idx) => {
+        const tr = document.createElement("tr");
+        tr.dataset.name = p[0].toLowerCase();
+        tr.dataset.index = idx;
+
+        tr.innerHTML = `
+          <td class="pblock">
+            <div class="pname">${p[0]}</div>
+            <div class="pline">Carton Price: ${p[1]}</div>
+            <div class="pline">Per Piece Price: ${p[2]}</div>
+          </td>
+
+          <td>
+            <div style="font-weight:900;font-size:12px;color:#334e68;margin-bottom:6px;">Carton Qty</div>
+            <div class="qty-controls">
+              <button class="btn btn-small" data-type="carton" data-action="dec" data-index="${idx}">−</button>
+              <span class="qty" id="carton-qty-${idx}">0</span>
+              <button class="btn btn-small" data-type="carton" data-action="inc" data-index="${idx}">+</button>
+            </div>
+          </td>
+
+          <td>
+            <div style="font-weight:900;font-size:12px;color:#334e68;margin-bottom:6px;">Piece Qty</div>
+            <div class="qty-controls">
+              <button class="btn btn-small" data-type="piece" data-action="dec" data-index="${idx}">−</button>
+              <span class="qty" id="piece-qty-${idx}">0</span>
+              <button class="btn btn-small" data-type="piece" data-action="inc" data-index="${idx}">+</button>
+            </div>
+          </td>
+
+          <td style="min-width:90px;">
+            <div style="font-weight:900;font-size:12px;color:#627d98;margin-bottom:6px;">Total</div>
+            <div style="font-weight:900;font-size:18px;" id="total-${idx}">0</div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderCards(){
+      cardList.innerHTML = "";
+      products.forEach((p, idx) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.dataset.name = p[0].toLowerCase();
+        card.dataset.index = idx;
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="pblock">
+              <div class="pname">${p[0]}</div>
+              <div class="pline">Carton Price: ${p[1]}</div>
+              <div class="pline">Per Piece Price: ${p[2]}</div>
+            </div>
+            <div class="card-total">
+              <div class="label">Total</div>
+              <div class="value" id="card-total-${idx}">0</div>
+            </div>
+          </div>
+
+          <div class="card-controls">
+            <div class="ctrl-box">
+              <div class="ctrl-title">Carton Qty</div>
+              <div class="qty-controls">
+                <button class="btn btn-small" data-type="carton" data-action="dec" data-index="${idx}">−</button>
+                <span class="qty" id="carton-qty-${idx}-m">0</span>
+                <button class="btn btn-small" data-type="carton" data-action="inc" data-index="${idx}">+</button>
+              </div>
+            </div>
+            <div class="ctrl-box">
+              <div class="ctrl-title">Piece Qty</div>
+              <div class="qty-controls">
+                <button class="btn btn-small" data-type="piece" data-action="dec" data-index="${idx}">−</button>
+                <span class="qty" id="piece-qty-${idx}-m">0</span>
+                <button class="btn btn-small" data-type="piece" data-action="inc" data-index="${idx}">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+        cardList.appendChild(card);
+      });
+    }
+
+    function updateDue(){
+      const twoPercent = Number(twoPercentEl.textContent) || 0;
+      const deposit = Number(depositInput.value) || 0;
+      const due = Math.max(0, twoPercent - deposit);
+      const dueVal = formatNumber(due);
+      dueInput.value = dueVal;
+      dueTotalText.textContent = dueVal;
+    }
+
+    function updateTotals(){
+      let grand = 0;
+
+      products.forEach((p, idx) => {
+        const cartonQty = getQty(idx, "carton");
+        const pieceQty = getQty(idx, "piece");
+
+        const total = (p[1] * cartonQty) + (p[2] * pieceQty);
+        const t = formatNumber(total);
+
+        const totalEl = document.getElementById(`total-${idx}`);
+        if(totalEl) totalEl.textContent = t;
+
+        const cardTotalEl = document.getElementById(`card-total-${idx}`);
+        if(cardTotalEl) cardTotalEl.textContent = t;
+
+        grand += total;
+      });
+
+      const g = formatNumber(grand);
+      grandTotalEl.textContent = g;
+
+      const two = formatNumber(grand * 1.02);
+      twoPercentEl.textContent = two;
+
+      updateDue();
+    }
+
+    function syncHeader(){
+      dsrText.textContent = dsrInput.value || "-";
+      dateText.textContent = dateInput.value || "-";
+    }
+
+    function applySearch(){
+      const q = (searchInput.value || "").trim().toLowerCase();
+
+      const rows = document.querySelectorAll("#productTable tbody tr");
+      rows.forEach(r => {
+        const name = r.dataset.name || "";
+        r.style.display = name.includes(q) ? "" : "none";
+      });
+
+      const cards = document.querySelectorAll("#cardList .card");
+      cards.forEach(c => {
+        const name = c.dataset.name || "";
+        c.style.display = name.includes(q) ? "" : "none";
+      });
+    }
+
+    // Events
+    dsrInput.addEventListener("input", syncHeader);
+    dateInput.addEventListener("change", syncHeader);
+    depositInput.addEventListener("input", updateDue);
+    searchInput.addEventListener("input", applySearch);
+
+    // Handle +/- clicks for both table and cards
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if(!btn) return;
+
+      const idx = btn.dataset.index;
+      const action = btn.dataset.action;
+      const type = btn.dataset.type;
+
+      if(idx === undefined || !type || !action) return;
+
+      if(type === "carton"){
+        let qty = getQty(idx, "carton");
+        if(action === "inc") qty += 0.5;
+        if(action === "dec") qty = Math.max(0, qty - 0.5);
+        const shown = qty.toFixed(2).replace(/\.00$/,'').replace(/\.50$/,'.5');
+        setQty(idx, "carton", shown);
+      } else {
+        let qty = getQty(idx, "piece");
+        if(action === "inc") qty += 1;
+        if(action === "dec") qty = Math.max(0, qty - 1);
+        setQty(idx, "piece", String(qty));
+      }
+
+      updateTotals();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      products.forEach((_, idx) => {
+        setQty(idx, "carton", "0");
+        setQty(idx, "piece", "0");
+
+        const totalEl = document.getElementById(`total-${idx}`);
+        if(totalEl) totalEl.textContent = "0";
+
+        const cardTotalEl = document.getElementById(`card-total-${idx}`);
+        if(cardTotalEl) cardTotalEl.textContent = "0";
+      });
+
+      depositInput.value = "";
+      dueInput.value = "";
+      dsrInput.value = "";
+      dateInput.value = "";
+      syncHeader();
+      updateTotals();
+      applySearch();
+    });
+
+    // PDF as image (বাংলা ঠিক থাকবে)
+    document.getElementById("pdfBtn").addEventListener("click", async () => {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      syncHeader();
+
+      const canvas = await html2canvas(document.body, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const imgWidth = pageWidth;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+      if (imgHeight <= pageHeight) {
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      } else {
+        let remainingHeight = imgHeight;
+        let position = 0;
+
+        while (remainingHeight > 0) {
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          remainingHeight -= pageHeight;
+          position -= pageHeight;
+          if (remainingHeight > 0) pdf.addPage();
+        }
+      }
+
+      const safeName = (dsrInput.value || "DSR").replace(/[^a-z0-9-_]/gi, "_");
+      const safeDate = (dateInput.value || "date");
+      pdf.save(`${safeName}_${safeDate}.pdf`);
+    });
+
+    // Init
+    renderTable();
+    renderCards();
+    syncHeader();
+    applySearch();
+    updateTotals();
+  </script>
+</body>
+</html>
